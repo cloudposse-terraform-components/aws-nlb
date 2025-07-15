@@ -28,6 +28,7 @@ func (s *ComponentSuite) TestBasic() {
 
 	s.DriftTest(component, stack, nil)
 }
+
 func (s *ComponentSuite) TestAcm() {
 	const component = "nlb/acm"
 	const stack = "default-test"
@@ -40,8 +41,22 @@ func (s *ComponentSuite) TestAcm() {
 
 	nlb_name := atmos.Output(s.T(), options, "nlb.nlb_name")
 	assert.True(s.T(), strings.HasPrefix(nlb_name, "eg-default-ue2-test-"))
-
 }
+
+func (s *ComponentSuite) TestDnsDelegated() {
+	const component = "nlb/dns-delegated"
+	const stack = "default-test"
+	const awsRegion = "us-east-2"
+
+	defer s.DestroyAtmosComponent(s.T(), component, stack, nil)
+	options, _ := s.DeployAtmosComponent(s.T(), component, stack, nil)
+
+	assert.NotNil(s.T(), options)
+
+	nlb_name := atmos.Output(s.T(), options, "nlb.nlb_name")
+	assert.True(s.T(), strings.HasPrefix(nlb_name, "eg-default-ue2-test-"))
+}
+
 func (s *ComponentSuite) TestEnabledFlag() {
 	const component = "nlb/disabled"
 	const stack = "default-test"

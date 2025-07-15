@@ -6,4 +6,3 @@ components:
       vars:
         enabled: true
         dns_acm_enabled: true
-        

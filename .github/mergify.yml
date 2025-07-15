@@ -99,7 +99,7 @@ shared:
       - "label~=(WIP|wip)"
       - *do_not_merge
       - *needs_attention
-      - 'draft'      
+      - 'draft'
 
   # Not in conflict
   not_in_conflict: &not_in_conflict
@@ -136,7 +136,7 @@ shared:
   checks_are_passing: &checks_are_passing
     and:
       - "-check-pending~=Branch\\/.*$"
-      - "-check-failure~=Branch\\/.*$"   
+      - "-check-failure~=Branch\\/.*$"
 
   # Only for terraform files
   require_terraform_checks_are_passing: &require_terraform_checks_are_passing
@@ -207,16 +207,16 @@ pull_request_rules:
         - *is_scaffold
         - *is_components_vendor
         - *is_tests
-        - *is_github_config          
+        - *is_github_config
         - *is_component
     actions:
       dismiss_reviews:
         when: "always"
-        changes_requested: 
+        changes_requested:
           - "mergify[bot]"
         approved:
-          - "mergify[bot]"        
-        message: "Dismiss all reviews before mergify auto approve"    
+          - "mergify[bot]"
+        message: "Dismiss all reviews before mergify auto approve"
       review:
         type: APPROVE
 
@@ -236,11 +236,11 @@ pull_request_rules:
     actions:
       dismiss_reviews:
         when: "always"
-        changes_requested: 
+        changes_requested:
           - "mergify[bot]"
         approved:
-          - "mergify[bot]"        
-        message: "Dismiss all reviews before mergify auto approve"    
+          - "mergify[bot]"
+        message: "Dismiss all reviews before mergify auto approve"
       review:
         type: APPROVE
 
@@ -267,13 +267,13 @@ pull_request_rules:
       - *not_in_conflict
       - *not_wip
       - *is_approved
-      - *checks_are_passing 
+      - *checks_are_passing
     actions:
       queue:
 
   - name: "Request approval for PRs"
     conditions:
-      - *is_open    
+      - *is_open
       - or:
         - *is_external_contributor
         - and:
@@ -290,7 +290,7 @@ pull_request_rules:
     conditions:
       - *is_open
       - *is_a_bot
-      - and: 
+      - and:
         - or:
           - *is_go_deps
           - *is_scaffold
@@ -519,9 +519,9 @@ pull_request_rules:
           - "no-changes"
       close:
         message: |
-          This pull request was automatically closed as it no longer contains any changes. 
-          
-          This typically happens when another merged pull request has already included this request's 
+          This pull request was automatically closed as it no longer contains any changes.
+
+          This typically happens when another merged pull request has already included this request's
           proposed modifications into the default branch.
 
   - name: welcome new contributors
@@ -536,7 +536,7 @@ pull_request_rules:
     actions:
       comment:
         message: |
-          Thanks @{{author}} for creating this pull request! 
+          Thanks @{{author}} for creating this pull request!
 
           A maintainer will review your changes shortly. Please don't be discouraged if it takes a while.
 

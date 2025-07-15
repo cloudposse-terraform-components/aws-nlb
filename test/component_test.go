@@ -23,8 +23,8 @@ func (s *ComponentSuite) TestBasic() {
 	options, _ := s.DeployAtmosComponent(s.T(), component, stack, nil)
 	assert.NotNil(s.T(), options)
 
-	nlb_name := atmos.Output(s.T(), options, "nlb.nlb_name")
-	assert.True(s.T(), strings.HasPrefix(nlb_name, "eg-default-ue2-test-"))
+	nlb := atmos.OutputMap(s.T(), options, "nlb")
+	assert.True(s.T(), strings.HasPrefix(nlb["nlb_name"], "eg-default-ue2-test-"))
 
 	s.DriftTest(component, stack, nil)
 }
@@ -39,8 +39,8 @@ func (s *ComponentSuite) TestAcm() {
 
 	assert.NotNil(s.T(), options)
 
-	nlb_name := atmos.Output(s.T(), options, "nlb.nlb_name")
-	assert.True(s.T(), strings.HasPrefix(nlb_name, "eg-default-ue2-test-"))
+	nlb := atmos.OutputMap(s.T(), options, "nlb")
+	assert.True(s.T(), strings.HasPrefix(nlb["nlb_name"], "eg-default-ue2-test-"))
 }
 
 func (s *ComponentSuite) TestDnsDelegated() {
@@ -53,8 +53,8 @@ func (s *ComponentSuite) TestDnsDelegated() {
 
 	assert.NotNil(s.T(), options)
 
-	nlb_name := atmos.Output(s.T(), options, "nlb.nlb_name")
-	assert.True(s.T(), strings.HasPrefix(nlb_name, "eg-default-ue2-test-"))
+	nlb := atmos.OutputMap(s.T(), options, "nlb")
+	assert.True(s.T(), strings.HasPrefix(nlb["nlb_name"], "eg-default-ue2-test-"))
 }
 
 func (s *ComponentSuite) TestEnabledFlag() {

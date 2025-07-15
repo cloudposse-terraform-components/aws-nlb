@@ -1,6 +1,6 @@
 components:
   terraform:
-    nlb/basic:
+    nlb/acm:
       metadata:
         component: target
       vars:

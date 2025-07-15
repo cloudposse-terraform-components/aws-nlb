@@ -1,5 +1,13 @@
 locals {
   enabled = module.this.enabled
+
+  dns_delegated_outputs             = module.dns_delegated.outputs
+  dns_delegated_default_domain_name = local.dns_delegated_outputs.default_domain_name
+  dns_delegated_certificate         = local.dns_delegated_outputs.certificate
+  dns_delegated_certificate_obj     = lookup(local.dns_delegated_certificate, local.dns_delegated_default_domain_name, {})
+  dns_delegated_certificate_arn     = lookup(local.dns_delegated_certificate_obj, "arn", "")
+
+  certificate_arn = var.dns_acm_enabled ? module.acm.outputs.arn : local.dns_delegated_certificate_arn
 }
 
 module "nlb" {
@@ -8,8 +16,8 @@ module "nlb" {
 
   enabled = local.enabled
 
-  vpc_id                        = var.vpc_id
-  subnet_ids                    = var.subnet_ids
+  vpc_id                        = coalesce(var.vpc_id, one(module.vpc[*].outputs.vpc_id))
+  subnet_ids                    = coalesce(var.subnet_ids, var.internal ? one(module.vpc[*].outputs.private_subnet_ids) : one(module.vpc[*].outputs.public_subnet_ids))
   security_group_ids            = var.security_group_ids
   internal                      = var.internal
   load_balancer_name            = var.load_balancer_name
@@ -27,7 +35,7 @@ module "nlb" {
   tcp_enabled                       = var.tcp_enabled
   tls_enabled                       = var.tls_enabled
   tls_port                          = var.tls_port
-  certificate_arn                   = var.certificate_arn
+  certificate_arn                   = coalesce(var.certificate_arn, local.certificate_arn, "false") == "false" ? null : coalesce(var.certificate_arn, local.certificate_arn)
   udp_enabled                       = var.udp_enabled
   udp_port                          = var.udp_port
   cross_zone_load_balancing_enabled = var.cross_zone_load_balancing_enabled

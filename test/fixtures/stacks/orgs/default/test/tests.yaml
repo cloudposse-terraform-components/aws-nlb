@@ -6,3 +6,5 @@ import:
   - catalog/acm
   - catalog/usecase/basic
   - catalog/usecase/disabled
+  - catalog/usecase/basic-acm
+  - catalog/usecase/basic-dns-delegated

@@ -5,3 +5,6 @@ components:
         component: target
       vars:
         enabled: true
+        name: "nlb"
+        attributes:
+          - "basic"

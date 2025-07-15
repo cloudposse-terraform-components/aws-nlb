@@ -1,8 +1,9 @@
 components:
   terraform:
-    nlb/basic:
+    nlb/dns-delegated:
       metadata:
         component: target
       vars:
         enabled: true
+        dns_acm_enabled: true
         

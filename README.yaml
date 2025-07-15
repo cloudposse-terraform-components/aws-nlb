@@ -6,6 +6,11 @@ description: |-
   Terraform component that wraps the [cloudposse/nlb/aws](https://github.com/cloudposse/terraform-aws-nlb) module.
   It provides a Network Load Balancer with optional listeners and target groups.
 
+  By default the component will lookup the VPC in the current stack unless `vpc_id` is passed in.
+
+  By default the component will lookup the ACM Certificate from the component `acm` unless `dns_acm_enabled` is set to `true`, in which case it will lookup the certificate from the component `dns-delegated`.
+  If neither are found the component will not bind to a certificate.
+
 usage: |-
   **Stack Level**: Regional
 

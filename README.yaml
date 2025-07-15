@@ -15,6 +15,19 @@ usage: |-
       nlb/basic:
         vars:
           enabled: true
+          name: "nlb"
+          # internal: false # default value
+  ```
+
+  Example passing in a VPC ID and subnets.
+
+  ```yaml
+  components:
+    terraform:
+      nlb/basic:
+        vars:
+          enabled: true
+          name: "nlb"
           vpc_id: "vpc-xxxxxxxx"
           subnet_ids:
             - "subnet-11111111"

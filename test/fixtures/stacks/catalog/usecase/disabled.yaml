@@ -1,6 +1,6 @@
 components:
   terraform:
-    example/disabled:
+    nlb/disabled:
       metadata:
         component: target
       vars:

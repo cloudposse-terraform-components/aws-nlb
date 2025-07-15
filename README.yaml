@@ -1,56 +1,44 @@
-name: "template"
+name: "aws-nlb"
 
-# Canonical GitHub repo
-github_repo: "cloudposse-terraform-components/template"
+github_repo: "cloudposse-terraform-components/aws-nlb"
 
-# Short description of this project
 description: |-
-  Description of this component 55
+  Terraform component that wraps the [cloudposse/nlb/aws](https://github.com/cloudposse/terraform-aws-nlb) module.
+  It provides a Network Load Balancer with optional listeners and target groups.
 
 usage: |-
-  **Stack Level**: Regional or Global
-
-  Here's an example snippet for how to use this component.
+  **Stack Level**: Regional
 
   ```yaml
   components:
     terraform:
-      foo:
+      nlb/basic:
         vars:
           enabled: true
+          vpc_id: "vpc-xxxxxxxx"
+          subnet_ids:
+            - "subnet-11111111"
+            - "subnet-22222222"
   ```
-
-
-
-
 
 include:
   - "docs/terraform.md"
 
 tags:
   - terraform
-  - terraform-modules
   - aws
   - components
   - terraform-components
-  - root
-  - geodesic
-  - reference-implementation
-  - reference-architecture
 
-# Categories of this project
 categories:
-  - terraform-modules/root
   - terraform-components
 
-# License of this project
 license: "APACHE2"
 
-# Badges to display
 badges:
   - name: "Latest Release"
-    image: "https://img.shields.io/github/release/cloudposse-terraform-components/template.svg?style=for-the-badge"
-    url: "https://github.com/cloudposse-terraform-components/template/releases/latest"
+    image: "https://img.shields.io/github/release/cloudposse-terraform-components/aws-nlb.svg?style=for-the-badge"
+    url: "https://github.com/cloudposse-terraform-components/aws-nlb/releases/latest"
   - name: "Slack Community"
     image: "https://slack.cloudposse.com/for-the-badge.svg"
     url: "https://slack.cloudposse.com"
@@ -64,15 +52,11 @@ references:
     url: "https://cloudposse.com/"
 
 related:
-- name: "Cloud Posse Terraform Modules"
-  description: Our collection of reusable Terraform modules used by our reference architectures.
-  url: "https://docs.cloudposse.com/modules/"
-- name: "Atmos"
-  description: "Atmos is like docker-compose but for your infrastructure"
-  url: "https://atmos.tools"
+  - name: "Cloud Posse Terraform Modules"
+    description: Our collection of reusable Terraform modules used by our reference architectures.
+    url: "https://docs.cloudposse.com/modules/"
+  - name: "Atmos"
+    description: "Atmos is like docker-compose but for your infrastructure"
+    url: "https://atmos.tools"
 
-contributors: [] # If included generates contribs
-
-
-
-
+contributors: []

@@ -1,7 +1,7 @@
 components:
   terraform:
-    example/basic:
+    nlb/basic:
       metadata:
         component: target
       vars:
-        enabled: true
+        enabled: false

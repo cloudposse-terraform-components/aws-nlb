@@ -194,3 +194,9 @@ variable "dns_acm_enabled" {
   default     = false
   description = "If `true`, use the ACM ARN created by the given `dns-delegated` component. Otherwise, use the ACM ARN created by the given `acm` component. Overridden by `certificate_arn`"
 }
+
+variable "access_logs_enabled" {
+  type        = bool
+  default     = false
+  description = "A boolean flag to enable/disable access_logs"
+}

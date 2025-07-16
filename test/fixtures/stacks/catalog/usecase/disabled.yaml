@@ -5,3 +5,6 @@ components:
         component: target
       vars:
         enabled: false
+        name: "nlb"
+        attributes:
+          - "disabled"

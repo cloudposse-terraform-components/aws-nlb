@@ -1,4 +1,4 @@
 output "nlb" {
   description = "The NLB of the Component"
-  value       = module.nlb
+  value       = one(module.nlb[*])
 }

@@ -11,6 +11,8 @@ locals {
 }
 
 module "nlb" {
+  count = local.enabled ? 1 : 0
+
   source  = "cloudposse/nlb/aws"
   version = "0.18.2"
 
@@ -44,6 +46,7 @@ module "nlb" {
   health_check_enabled              = var.health_check_enabled
   health_check_port                 = var.health_check_port
   stickiness_enabled                = var.stickiness_enabled
+  access_logs_enabled               = var.access_logs_enabled
 
   context = module.this.context
 }

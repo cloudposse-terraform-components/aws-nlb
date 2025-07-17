@@ -13,4 +13,3 @@
 # Protect .pre-commit-config.yaml and Makefile to security
 .pre-commit-config.yaml @cloudposse-terraform-components/security
 Makefile @cloudposse-terraform-components/security
-

@@ -11,6 +11,9 @@ description: |-
   By default the component will lookup the ACM Certificate from the component `acm` unless `dns_acm_enabled` is set to `true`, in which case it will lookup the certificate from the component `dns-delegated`.
   If neither are found the component will not bind to a certificate.
 
+  <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+  <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->  
+
 usage: |-
   **Stack Level**: Regional
 
@@ -38,9 +41,6 @@ usage: |-
             - "subnet-11111111"
             - "subnet-22222222"
   ```
-
-include:
-  - "docs/terraform.md"
 
 tags:
   - terraform

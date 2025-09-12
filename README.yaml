@@ -1,74 +1,99 @@
 name: "aws-nlb"
-
+# Canonical GitHub repo
 github_repo: "cloudposse-terraform-components/aws-nlb"
-
+# Short description of this project
 description: |-
-  Terraform component that wraps the [cloudposse/nlb/aws](https://github.com/cloudposse/terraform-aws-nlb) module.
-  It provides a Network Load Balancer with optional listeners and target groups.
+  This component provisions an AWS Network Load Balancer (NLB) using the
+  upstream Cloud Posse Terraform module. It supports internet-facing or
+  internal NLBs, TCP/TLS/UDP listeners, optional default target group,
+  cross-zone load balancing, access logs, subnet EIP mappings, and deletion
+  protection.
 
-  By default the component will lookup the VPC in the current stack unless `vpc_id` is passed in.
+  It integrates with other Atmos components via remote state:
 
-  By default the component will lookup the ACM Certificate from the component `acm` unless `dns_acm_enabled` is set to `true`, in which case it will lookup the certificate from the component `dns-delegated`.
-  If neither are found the component will not bind to a certificate.
+  - `vpc`: to automatically source the VPC ID and appropriate subnets
+    (public or private) when not provided explicitly.
+  - `acm` or `dns-delegated`: to automatically discover an ACM certificate
+    ARN for TLS listeners when `certificate_arn` is not provided. Behavior
+    is controlled by `dns_acm_enabled`.
 
-  <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-  <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->  
+  You can also override any of these via input variables, including
+  providing a specific `certificate_arn` directly.
 
+  <!-- prettier-ignore-start -->
+  <!-- prettier-ignore-end -->
 usage: |-
   **Stack Level**: Regional
 
-  ```yaml
-  components:
-    terraform:
-      nlb/basic:
-        vars:
-          enabled: true
-          name: "nlb"
-          # internal: false # default value
-  ```
+  ### Example
 
-  Example passing in a VPC ID and subnets.
+  Here's an example snippet showing how to use this component in an Atmos stack.
 
   ```yaml
   components:
     terraform:
-      nlb/basic:
+      vpc:
         vars:
-          enabled: true
-          name: "nlb"
-          vpc_id: "vpc-xxxxxxxx"
-          subnet_ids:
-            - "subnet-11111111"
-            - "subnet-22222222"
+          availability_zones: ["a", "b", "c"]
+          ipv4_primary_cidr_block: "10.100.0.0/18"
+
+      nlb:
+        vars:
+          # Core settings
+          internal: false
+          tcp_enabled: true
+          tcp_port: 80
+          tls_enabled: true
+          tls_port: 443
+
+          # Optional: discover cert from other components via remote state
+          # Toggle behavior with `dns_acm_enabled` or provide `certificate_arn`
+          dns_acm_enabled: true
+          acm_component_name: acm
+          dns_delegated_component_name: dns-delegated
+          # certificate_arn: "arn:aws:acm:..."
+
+          # Optional: map EIPs to subnets
+          subnet_mapping_enabled: false
+          eip_allocation_ids: []
+
+          # Other common options
+          cross_zone_load_balancing_enabled: true
+          deletion_protection_enabled: false
+          access_logs_enabled: false
   ```
 
-tags:
-  - terraform
-  - aws
-  - components
-  - terraform-components
-
-categories:
-  - terraform-components
-
-license: "APACHE2"
-
-badges:
-  - name: "Latest Release"
-    image: "https://img.shields.io/github/release/cloudposse-terraform-components/aws-nlb.svg?style=for-the-badge"
-    url: "https://github.com/cloudposse-terraform-components/aws-nlb/releases/latest"
-  - name: "Slack Community"
-    image: "https://slack.cloudposse.com/for-the-badge.svg"
-    url: "https://slack.cloudposse.com"
-
+  <!-- prettier-ignore-start -->
+  <!-- prettier-ignore-end -->
 references:
-  - name: "Cloud Posse Documentation"
-    description: "Complete documentation for the Cloud Posse solution"
-    url: "https://docs.cloudposse.com"
-  - name: "Reference Architectures"
-    description: "Launch effortlessly with our turnkey reference architectures, built either by your team or ours."
-    url: "https://cloudposse.com/"
-
+  - name: Terraform Registry — cloudposse/nlb/aws
+    description: ""
+    url: https://registry.terraform.io/modules/cloudposse/nlb/aws
+  - name: AWS Documentation — Network Load Balancers
+    description: ""
+    url: https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html
+  - name: Cloud Posse — stack-config remote-state module
+    description: ""
+    url: https://registry.terraform.io/modules/cloudposse/stack-config/yaml
+tags:
+  - component/nlb
+  - layer/network
+  - provider/aws
+# Categories of this project
+categories:
+  - component/nlb
+  - layer/network
+  - provider/aws
+# License of this project
+license: "APACHE2"
+# Badges to display
+badges:
+  - name: Latest Release
+    image: https://img.shields.io/github/release/cloudposse-terraform-components/aws-nlb.svg?style=for-the-badge
+    url: https://github.com/cloudposse-terraform-components/aws-nlb/releases/latest
+  - name: Slack Community
+    image: https://slack.cloudposse.com/for-the-badge.svg
+    url: https://slack.cloudposse.com
 related:
   - name: "Cloud Posse Terraform Modules"
     description: Our collection of reusable Terraform modules used by our reference architectures.
@@ -76,5 +101,4 @@ related:
   - name: "Atmos"
     description: "Atmos is like docker-compose but for your infrastructure"
     url: "https://atmos.tools"
-
-contributors: []
+contributors: [] # If included generates contribs

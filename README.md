@@ -2,8 +2,11 @@
 
 <!-- markdownlint-disable -->
 <a href="https://cpco.io/homepage"><img src="https://github.com/cloudposse-terraform-components/aws-nlb/blob/main/.github/banner.png?raw=true" alt="Project Banner"/></a><br/>
-    <p align="right">
-<a href="https://github.com/cloudposse-terraform-components/aws-nlb/releases/latest"><img src="https://img.shields.io/github/release/cloudposse-terraform-components/aws-nlb.svg?style=for-the-badge" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/for-the-badge.svg" alt="Slack Community"/></a></p>
+
+
+<p align="right"><a href="https://github.com/cloudposse-terraform-components/aws-nlb/releases/latest"><img src="https://img.shields.io/github/release/cloudposse-terraform-components/aws-nlb.svg?style=for-the-badge" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/for-the-badge.svg" alt="Slack Community"/></a><a href="https://cloudposse.com/support/"><img src="https://img.shields.io/badge/Get_Support-success.svg?style=for-the-badge" alt="Get Support"/></a>
+
+</p>
 <!-- markdownlint-restore -->
 
 <!--
@@ -27,8 +30,25 @@
 
 -->
 
-Terraform component that wraps the [cloudposse/nlb/aws](https://github.com/cloudposse/terraform-aws-nlb) module.
-It provides a Network Load Balancer with optional listeners and target groups.
+This component provisions an AWS Network Load Balancer (NLB) using the
+upstream Cloud Posse Terraform module. It supports internet-facing or
+internal NLBs, TCP/TLS/UDP listeners, optional default target group,
+cross-zone load balancing, access logs, subnet EIP mappings, and deletion
+protection.
+
+It integrates with other Atmos components via remote state:
+
+- `vpc`: to automatically source the VPC ID and appropriate subnets
+  (public or private) when not provided explicitly.
+- `acm` or `dns-delegated`: to automatically discover an ACM certificate
+  ARN for TLS listeners when `certificate_arn` is not provided. Behavior
+  is controlled by `dns_acm_enabled`.
+
+You can also override any of these via input variables, including
+providing a specific `certificate_arn` directly.
+
+<!-- prettier-ignore-start -->
+<!-- prettier-ignore-end -->
 
 
 > [!TIP]
@@ -50,17 +70,46 @@ It provides a Network Load Balancer with optional listeners and target groups.
 
 **Stack Level**: Regional
 
+### Example
+
+Here's an example snippet showing how to use this component in an Atmos stack.
+
 ```yaml
 components:
   terraform:
-    nlb/basic:
+    vpc:
       vars:
-        enabled: true
-        vpc_id: "vpc-xxxxxxxx"
-        subnet_ids:
-          - "subnet-11111111"
-          - "subnet-22222222"
+        availability_zones: ["a", "b", "c"]
+        ipv4_primary_cidr_block: "10.100.0.0/18"
+
+    nlb:
+      vars:
+        # Core settings
+        internal: false
+        tcp_enabled: true
+        tcp_port: 80
+        tls_enabled: true
+        tls_port: 443
+
+        # Optional: discover cert from other components via remote state
+        # Toggle behavior with `dns_acm_enabled` or provide `certificate_arn`
+        dns_acm_enabled: true
+        acm_component_name: acm
+        dns_delegated_component_name: dns-delegated
+        # certificate_arn: "arn:aws:acm:..."
+
+        # Optional: map EIPs to subnets
+        subnet_mapping_enabled: false
+        eip_allocation_ids: []
+
+        # Other common options
+        cross_zone_load_balancing_enabled: true
+        deletion_protection_enabled: false
+        access_logs_enabled: false
 ```
+
+<!-- prettier-ignore-start -->
+<!-- prettier-ignore-end -->
 
 > [!IMPORTANT]
 > In Cloud Posse's examples, we avoid pinning modules to specific versions to prevent discrepancies between the documentation
@@ -75,7 +124,100 @@ components:
 
 
 
-# Terraform Module
+<!-- markdownlint-disable -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.0 |
+
+## Providers
+
+No providers.
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_acm"></a> [acm](#module\_acm) | cloudposse/stack-config/yaml//modules/remote-state | 1.8.0 |
+| <a name="module_dns_delegated"></a> [dns\_delegated](#module\_dns\_delegated) | cloudposse/stack-config/yaml//modules/remote-state | 1.8.0 |
+| <a name="module_iam_roles"></a> [iam\_roles](#module\_iam\_roles) | ../account-map/modules/iam-roles | n/a |
+| <a name="module_nlb"></a> [nlb](#module\_nlb) | cloudposse/nlb/aws | 0.18.2 |
+| <a name="module_this"></a> [this](#module\_this) | cloudposse/label/null | 0.25.0 |
+| <a name="module_vpc"></a> [vpc](#module\_vpc) | cloudposse/stack-config/yaml//modules/remote-state | 1.8.0 |
+
+## Resources
+
+No resources.
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_access_logs_enabled"></a> [access\_logs\_enabled](#input\_access\_logs\_enabled) | A boolean flag to enable/disable access\_logs | `bool` | `false` | no |
+| <a name="input_acm_component_name"></a> [acm\_component\_name](#input\_acm\_component\_name) | Atmos `acm` component name | `string` | `"acm"` | no |
+| <a name="input_additional_tag_map"></a> [additional\_tag\_map](#input\_additional\_tag\_map) | Additional key-value pairs to add to each map in `tags_as_list_of_maps`. Not added to `tags` or `id`.<br/>This is for some rare cases where resources want additional configuration of tags<br/>and therefore take a list of maps with tag key, value, and additional configuration. | `map(string)` | `{}` | no |
+| <a name="input_attributes"></a> [attributes](#input\_attributes) | ID element. Additional attributes (e.g. `workers` or `cluster`) to add to `id`,<br/>in the order they appear in the list. New attributes are appended to the<br/>end of the list. The elements of the list are joined by the `delimiter`<br/>and treated as a single ID element. | `list(string)` | `[]` | no |
+| <a name="input_certificate_arn"></a> [certificate\_arn](#input\_certificate\_arn) | ARN of the certificate for the TLS listener | `string` | `null` | no |
+| <a name="input_context"></a> [context](#input\_context) | Single object for setting entire context at once.<br/>See description of individual variables for details.<br/>Leave string and numeric variables as `null` to use default value.<br/>Individual variable settings (non-null) override settings in context object,<br/>except for attributes, tags, and additional\_tag\_map, which are merged. | `any` | <pre>{<br/>  "additional_tag_map": {},<br/>  "attributes": [],<br/>  "delimiter": null,<br/>  "descriptor_formats": {},<br/>  "enabled": true,<br/>  "environment": null,<br/>  "id_length_limit": null,<br/>  "label_key_case": null,<br/>  "label_order": [],<br/>  "label_value_case": null,<br/>  "labels_as_tags": [<br/>    "unset"<br/>  ],<br/>  "name": null,<br/>  "namespace": null,<br/>  "regex_replace_chars": null,<br/>  "stage": null,<br/>  "tags": {},<br/>  "tenant": null<br/>}</pre> | no |
+| <a name="input_cross_zone_load_balancing_enabled"></a> [cross\_zone\_load\_balancing\_enabled](#input\_cross\_zone\_load\_balancing\_enabled) | Enable cross zone load balancing | `bool` | `true` | no |
+| <a name="input_deletion_protection_enabled"></a> [deletion\_protection\_enabled](#input\_deletion\_protection\_enabled) | Enable deletion protection for the NLB | `bool` | `false` | no |
+| <a name="input_delimiter"></a> [delimiter](#input\_delimiter) | Delimiter to be used between ID elements.<br/>Defaults to `-` (hyphen). Set to `""` to use no delimiter at all. | `string` | `null` | no |
+| <a name="input_deregistration_delay"></a> [deregistration\_delay](#input\_deregistration\_delay) | Time to wait before deregistering targets | `number` | `15` | no |
+| <a name="input_descriptor_formats"></a> [descriptor\_formats](#input\_descriptor\_formats) | Describe additional descriptors to be output in the `descriptors` output map.<br/>Map of maps. Keys are names of descriptors. Values are maps of the form<br/>`{<br/>   format = string<br/>   labels = list(string)<br/>}`<br/>(Type is `any` so the map values can later be enhanced to provide additional options.)<br/>`format` is a Terraform format string to be passed to the `format()` function.<br/>`labels` is a list of labels, in order, to pass to `format()` function.<br/>Label values will be normalized before being passed to `format()` so they will be<br/>identical to how they appear in `id`.<br/>Default is `{}` (`descriptors` output will be empty). | `any` | `{}` | no |
+| <a name="input_dns_acm_enabled"></a> [dns\_acm\_enabled](#input\_dns\_acm\_enabled) | If `true`, use the ACM ARN created by the given `dns-delegated` component. Otherwise, use the ACM ARN created by the given `acm` component. Overridden by `certificate_arn` | `bool` | `false` | no |
+| <a name="input_dns_delegated_component_name"></a> [dns\_delegated\_component\_name](#input\_dns\_delegated\_component\_name) | Atmos `dns-delegated` component name | `string` | `"dns-delegated"` | no |
+| <a name="input_dns_delegated_environment_name"></a> [dns\_delegated\_environment\_name](#input\_dns\_delegated\_environment\_name) | `dns-delegated` component environment name | `string` | `null` | no |
+| <a name="input_eip_allocation_ids"></a> [eip\_allocation\_ids](#input\_eip\_allocation\_ids) | Allocation IDs for EIPs when subnet mapping is enabled | `list(string)` | `[]` | no |
+| <a name="input_enabled"></a> [enabled](#input\_enabled) | Set to false to prevent the module from creating any resources | `bool` | `null` | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | `null` | no |
+| <a name="input_health_check_enabled"></a> [health\_check\_enabled](#input\_health\_check\_enabled) | Enable health checks | `bool` | `true` | no |
+| <a name="input_health_check_port"></a> [health\_check\_port](#input\_health\_check\_port) | Port for health checks | `number` | `null` | no |
+| <a name="input_id_length_limit"></a> [id\_length\_limit](#input\_id\_length\_limit) | Limit `id` to this many characters (minimum 6).<br/>Set to `0` for unlimited length.<br/>Set to `null` for keep the existing setting, which defaults to `0`.<br/>Does not affect `id_full`. | `number` | `null` | no |
+| <a name="input_internal"></a> [internal](#input\_internal) | Whether the NLB is internal | `bool` | `false` | no |
+| <a name="input_label_key_case"></a> [label\_key\_case](#input\_label\_key\_case) | Controls the letter case of the `tags` keys (label names) for tags generated by this module.<br/>Does not affect keys of tags passed in via the `tags` input.<br/>Possible values: `lower`, `title`, `upper`.<br/>Default value: `title`. | `string` | `null` | no |
+| <a name="input_label_order"></a> [label\_order](#input\_label\_order) | The order in which the labels (ID elements) appear in the `id`.<br/>Defaults to ["namespace", "environment", "stage", "name", "attributes"].<br/>You can omit any of the 6 labels ("tenant" is the 6th), but at least one must be present. | `list(string)` | `null` | no |
+| <a name="input_label_value_case"></a> [label\_value\_case](#input\_label\_value\_case) | Controls the letter case of ID elements (labels) as included in `id`,<br/>set as tag values, and output by this module individually.<br/>Does not affect values of tags passed in via the `tags` input.<br/>Possible values: `lower`, `title`, `upper` and `none` (no transformation).<br/>Set this to `title` and set `delimiter` to `""` to yield Pascal Case IDs.<br/>Default value: `lower`. | `string` | `null` | no |
+| <a name="input_labels_as_tags"></a> [labels\_as\_tags](#input\_labels\_as\_tags) | Set of labels (ID elements) to include as tags in the `tags` output.<br/>Default is to include all labels.<br/>Tags with empty values will not be included in the `tags` output.<br/>Set to `[]` to suppress all generated tags.<br/>**Notes:**<br/>  The value of the `name` tag, if included, will be the `id`, not the `name`.<br/>  Unlike other `null-label` inputs, the initial setting of `labels_as_tags` cannot be<br/>  changed in later chained modules. Attempts to change it will be silently ignored. | `set(string)` | <pre>[<br/>  "default"<br/>]</pre> | no |
+| <a name="input_load_balancer_name"></a> [load\_balancer\_name](#input\_load\_balancer\_name) | Name for the load balancer | `string` | `""` | no |
+| <a name="input_load_balancer_name_max_length"></a> [load\_balancer\_name\_max\_length](#input\_load\_balancer\_name\_max\_length) | Max length for the load balancer name | `number` | `32` | no |
+| <a name="input_name"></a> [name](#input\_name) | ID element. Usually the component or solution name, e.g. 'app' or 'jenkins'.<br/>This is the only ID element not also included as a `tag`.<br/>The "name" tag is set to the full `id` string. There is no tag with the value of the `name` input. | `string` | `null` | no |
+| <a name="input_namespace"></a> [namespace](#input\_namespace) | ID element. Usually an abbreviation of your organization name, e.g. 'eg' or 'cp', to help ensure generated IDs are globally unique | `string` | `null` | no |
+| <a name="input_regex_replace_chars"></a> [regex\_replace\_chars](#input\_regex\_replace\_chars) | Terraform regular expression (regex) string.<br/>Characters matching the regex will be removed from the ID elements.<br/>If not set, `"/[^a-zA-Z0-9-]/"` is used to remove all characters other than hyphens, letters and digits. | `string` | `null` | no |
+| <a name="input_region"></a> [region](#input\_region) | AWS Region | `string` | n/a | yes |
+| <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | Additional security group IDs to allow access to the NLB | `list(string)` | `[]` | no |
+| <a name="input_stage"></a> [stage](#input\_stage) | ID element. Usually used to indicate role, e.g. 'prod', 'staging', 'source', 'build', 'test', 'deploy', 'release' | `string` | `null` | no |
+| <a name="input_stickiness_enabled"></a> [stickiness\_enabled](#input\_stickiness\_enabled) | Enable stickiness on the default target group | `bool` | `false` | no |
+| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | List of subnet IDs to associate with NLB | `list(string)` | `null` | no |
+| <a name="input_subnet_mapping_enabled"></a> [subnet\_mapping\_enabled](#input\_subnet\_mapping\_enabled) | Create EIPs for the provided subnet IDs | `bool` | `false` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Additional tags (e.g. `{'BusinessUnit': 'XYZ'}`).<br/>Neither the tag keys nor the tag values will be modified by this module. | `map(string)` | `{}` | no |
+| <a name="input_target_group_enabled"></a> [target\_group\_enabled](#input\_target\_group\_enabled) | Whether to create the default target group and listener | `bool` | `true` | no |
+| <a name="input_target_group_ip_address_type"></a> [target\_group\_ip\_address\_type](#input\_target\_group\_ip\_address\_type) | IP address type for the target group | `string` | `"ipv4"` | no |
+| <a name="input_target_group_name"></a> [target\_group\_name](#input\_target\_group\_name) | Name of the default target group | `string` | `""` | no |
+| <a name="input_target_group_name_max_length"></a> [target\_group\_name\_max\_length](#input\_target\_group\_name\_max\_length) | Max length for the target group name | `number` | `32` | no |
+| <a name="input_target_group_port"></a> [target\_group\_port](#input\_target\_group\_port) | Port for the default target group | `number` | `80` | no |
+| <a name="input_target_group_target_type"></a> [target\_group\_target\_type](#input\_target\_group\_target\_type) | Target type for the default target group | `string` | `"ip"` | no |
+| <a name="input_tcp_enabled"></a> [tcp\_enabled](#input\_tcp\_enabled) | Enable the TCP listener | `bool` | `true` | no |
+| <a name="input_tcp_port"></a> [tcp\_port](#input\_tcp\_port) | Port for the TCP listener | `number` | `80` | no |
+| <a name="input_tenant"></a> [tenant](#input\_tenant) | ID element \_(Rarely used, not included by default)\_. A customer identifier, indicating who this instance of a resource is for | `string` | `null` | no |
+| <a name="input_tls_enabled"></a> [tls\_enabled](#input\_tls\_enabled) | Enable the TLS listener | `bool` | `false` | no |
+| <a name="input_tls_port"></a> [tls\_port](#input\_tls\_port) | Port for the TLS listener | `number` | `443` | no |
+| <a name="input_udp_enabled"></a> [udp\_enabled](#input\_udp\_enabled) | Enable the UDP listener | `bool` | `false` | no |
+| <a name="input_udp_port"></a> [udp\_port](#input\_udp\_port) | Port for the UDP listener | `number` | `53` | no |
+| <a name="input_vpc_component_name"></a> [vpc\_component\_name](#input\_vpc\_component\_name) | Name of the VPC component | `string` | `"vpc"` | no |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID to associate with NLB | `string` | `null` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_nlb"></a> [nlb](#output\_nlb) | The NLB of the Component |
+<!-- markdownlint-restore -->
+
+
+
+
 
 
 ## Related Projects
@@ -90,8 +232,9 @@ Check out these related projects.
 
 For additional context, refer to some of these links.
 
-- [Cloud Posse Documentation](https://docs.cloudposse.com) - Complete documentation for the Cloud Posse solution
-- [Reference Architectures](https://cloudposse.com/) - Launch effortlessly with our turnkey reference architectures, built either by your team or ours.
+- [Terraform Registry — cloudposse/nlb/aws](https://registry.terraform.io/modules/cloudposse/nlb/aws) - 
+- [AWS Documentation — Network Load Balancers](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html) - 
+- [Cloud Posse — stack-config remote-state module](https://registry.terraform.io/modules/cloudposse/stack-config/yaml) - 
 
 
 
@@ -158,6 +301,38 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
  6. Submit a **Pull Request** so that we can review your changes
 
 **NOTE:** Be sure to merge the latest changes from "upstream" before making a pull request!
+
+
+## Running Terraform Tests
+
+We use [Atmos](https://atmos.tools) to streamline how Terraform tests are run. It centralizes configuration and wraps common test workflows with easy-to-use commands.
+
+All tests are located in the [`test/`](test) folder.
+
+Under the hood, tests are powered by Terratest together with our internal [Test Helpers](https://github.com/cloudposse/test-helpers) library, providing robust infrastructure validation.
+
+Setup dependencies:
+- Install Atmos ([installation guide](https://atmos.tools/install/))
+- Install Go [1.24+ or newer](https://go.dev/doc/install)
+- Install Terraform or OpenTofu
+
+To run tests:
+
+- Run all tests:  
+  ```sh
+  atmos test run
+  ```
+- Clean up test artifacts:  
+  ```sh
+  atmos test clean
+  ```
+- Explore additional test options:  
+  ```sh
+  atmos test --help
+  ```
+The configuration for test commands is centrally managed. To review what's being imported, see the [`atmos.yaml`](https://raw.githubusercontent.com/cloudposse/.github/refs/heads/main/.github/atmos/terraform-module.yaml) file.
+
+Learn more about our [automated testing in our documentation](https://docs.cloudposse.com/community/contribute/automated-testing/) or implementing [custom commands](https://atmos.tools/core-concepts/custom-commands/) with atmos.
 
 ### 🌎 Slack Community
 

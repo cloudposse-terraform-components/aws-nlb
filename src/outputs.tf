@@ -5,5 +5,5 @@ output "nlb" {
 
 output "nlb_arn" {
   description = "The ARN of the NLB"
-  value       = one(module.nlb[*].arn)
+  value       = one(module.nlb[*].nlb_arn)
 }

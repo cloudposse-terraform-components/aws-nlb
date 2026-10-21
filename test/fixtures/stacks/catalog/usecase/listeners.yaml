@@ -1,0 +1,25 @@
+components:
+  terraform:
+    nlb/listeners:
+      metadata:
+        component: target
+      vars:
+        enabled: true
+        name: "nlb"
+        attributes:
+          - "listeners"
+        # Only the additional listeners; no default listener/target group.
+        target_group_enabled: false
+        security_group_enabled: true
+        listeners:
+          sql:
+            port: 1433
+            ingress_cidr_blocks: ["10.0.0.0/8"]
+          sql-ag:
+            port: 5022
+            ingress_cidr_blocks: ["10.0.0.0/8"]
+          avl:
+            port: 35035
+            protocol: UDP
+            health_check:
+              port: "1433"

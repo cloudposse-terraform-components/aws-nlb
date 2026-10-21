@@ -200,3 +200,68 @@ variable "access_logs_enabled" {
   default     = false
   description = "A boolean flag to enable/disable access_logs"
 }
+
+variable "security_group_enabled" {
+  type        = bool
+  default     = false
+  description = <<-EOT
+    Whether the module creates a security group for the NLB. Required for `listeners[*].ingress_cidr_blocks`.
+    An NLB security group can only be attached when the NLB is created, so enabling this on an existing NLB replaces it.
+    EOT
+}
+
+variable "listeners" {
+  type = map(object({
+    port                 = number
+    protocol             = optional(string, "TCP")
+    target_port          = optional(number)
+    target_protocol      = optional(string)
+    target_type          = optional(string)
+    preserve_client_ip   = optional(bool)
+    deregistration_delay = optional(number)
+    certificate_arn      = optional(string)
+    ssl_policy           = optional(string)
+    ingress_cidr_blocks  = optional(list(string), [])
+    health_check = optional(object({
+      enabled             = optional(bool, true)
+      port                = optional(string, "traffic-port")
+      protocol            = optional(string, "TCP")
+      path                = optional(string)
+      healthy_threshold   = optional(number, 3)
+      unhealthy_threshold = optional(number, 3)
+      interval            = optional(number, 30)
+    }), {})
+    targets = optional(list(object({
+      id   = string
+      port = optional(number)
+    })), [])
+  }))
+  default     = {}
+  description = <<-EOT
+    Additional listeners, keyed by name. Each key creates its own target group and listener on the NLB,
+    so one NLB can serve any number of ports. Independent of the default listener (`tcp_*`/`udp_*`/`tls_*`);
+    set `target_group_enabled = false` to use only these.
+    - `port`: listener port. `protocol`: `TCP`, `UDP`, `TCP_UDP` or `TLS`.
+    - `target_port`/`target_protocol`: defaults to `port` and to `protocol` (`TCP` for a `TLS` listener).
+    - `target_type`: defaults to `target_group_target_type`.
+    - `certificate_arn`: `TLS` only; defaults to `certificate_arn`, then the ACM / dns-delegated certificate.
+    - `ingress_cidr_blocks`: CIDRs allowed on the NLB security group for this port (needs `security_group_enabled`).
+    - `health_check.protocol`: `TCP`, `HTTP` or `HTTPS` (`UDP` target groups cannot use a UDP health check).
+    - `targets`: optional target registrations (instance ID, IP or Lambda ARN, matching `target_type`).
+    EOT
+
+  validation {
+    condition     = alltrue([for l in values(var.listeners) : contains(["TCP", "UDP", "TCP_UDP", "TLS"], l.protocol)])
+    error_message = "listeners[*].protocol must be one of TCP, UDP, TCP_UDP or TLS."
+  }
+
+  validation {
+    condition     = length(distinct([for l in values(var.listeners) : l.port])) == length(var.listeners)
+    error_message = "listeners[*].port must be unique across listeners."
+  }
+
+  validation {
+    condition     = alltrue([for l in values(var.listeners) : contains(["TCP", "HTTP", "HTTPS"], l.health_check.protocol)])
+    error_message = "listeners[*].health_check.protocol must be one of TCP, HTTP or HTTPS."
+  }
+}

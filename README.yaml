@@ -63,6 +63,43 @@ usage: |-
           access_logs_enabled: false
   ```
 
+  ### Multiple listeners
+
+  The default listener serves one port. Use `listeners` to put any number of ports on the same NLB (and the same
+  EIPs). Each entry creates its own target group and listener; `ingress_cidr_blocks` opens the port on the NLB
+  security group, so set `security_group_enabled: true` (an NLB security group can only be attached at creation).
+
+  ```yaml
+  components:
+    terraform:
+      nlb:
+        vars:
+          internal: false
+          target_group_enabled: false # only the listeners below
+          target_group_target_type: instance
+          security_group_enabled: true
+          subnet_mapping_enabled: true
+          listeners:
+            sql:
+              port: 1433
+              ingress_cidr_blocks: ["203.0.113.10/32"]
+              targets:
+                - id: i-0123456789abcdef0
+            sql-ag:
+              port: 5022
+              ingress_cidr_blocks: ["203.0.113.10/32"]
+              targets:
+                - id: i-0123456789abcdef0
+            avl:
+              port: 35035
+              protocol: UDP
+              ingress_cidr_blocks: ["203.0.113.10/32"]
+              health_check:
+                port: "1433" # UDP target groups need a TCP/HTTP(S) health check
+              targets:
+                - id: i-0123456789abcdef0
+  ```
+
   <!-- prettier-ignore-start -->
   <!-- prettier-ignore-end -->
 references:

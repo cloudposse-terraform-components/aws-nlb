@@ -82,7 +82,7 @@ resource "aws_lb_target_group" "listener" {
 resource "aws_lb_listener" "listener" {
   for_each = local.listeners
 
-  load_balancer_arn = module.nlb[0].nlb_arn
+  load_balancer_arn = one(module.nlb[*]).nlb_arn
   port              = each.value.port
   protocol          = each.value.protocol
   certificate_arn   = each.value.protocol == "TLS" ? coalesce(each.value.certificate_arn, var.certificate_arn, local.certificate_arn) : null
@@ -108,7 +108,7 @@ resource "aws_security_group_rule" "listener_ingress" {
   for_each = local.listener_ingress_rules
 
   type              = "ingress"
-  security_group_id = module.nlb[0].security_group_id
+  security_group_id = one(module.nlb[*]).security_group_id
   from_port         = each.value.port
   to_port           = each.value.port
   protocol          = each.value.protocol

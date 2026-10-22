@@ -76,6 +76,10 @@ usage: |-
         vars:
           internal: false
           target_group_enabled: false # only the listeners below
+          # The module adds its default-listener SG rule (tcp_port from
+          # default_listener_ingress_cidr_blocks, 0.0.0.0/0 by default)
+          # whenever tcp_enabled is true, even with no default listener.
+          tcp_enabled: false
           target_group_target_type: instance
           security_group_enabled: true
           subnet_mapping_enabled: true

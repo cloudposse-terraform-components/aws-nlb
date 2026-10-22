@@ -10,6 +10,9 @@ components:
           - "listeners"
         # Only the additional listeners; no default listener/target group.
         target_group_enabled: false
+        # Otherwise the module still adds its default-listener SG rule
+        # (port 80 from 0.0.0.0/0).
+        tcp_enabled: false
         security_group_enabled: true
         listeners:
           sql:

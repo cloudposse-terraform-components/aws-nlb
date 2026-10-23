@@ -14,7 +14,7 @@ module "nlb" {
   count = local.enabled ? 1 : 0
 
   source  = "cloudposse/nlb/aws"
-  version = "0.18.2"
+  version = "0.18.3"
 
   enabled = local.enabled
 

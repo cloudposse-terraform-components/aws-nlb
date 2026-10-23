@@ -57,6 +57,31 @@ func (s *ComponentSuite) TestDnsDelegated() {
 	assert.True(s.T(), strings.HasPrefix(nlb["nlb_name"], "eg-default-ue2-test-"))
 }
 
+func (s *ComponentSuite) TestListeners() {
+	const component = "nlb/listeners"
+	const stack = "default-test"
+	const awsRegion = "us-east-2"
+
+	defer s.DestroyAtmosComponent(s.T(), component, stack, nil)
+	options, _ := s.DeployAtmosComponent(s.T(), component, stack, nil)
+	assert.NotNil(s.T(), options)
+
+	nlb := atmos.OutputMap(s.T(), options, "nlb")
+	assert.True(s.T(), strings.HasPrefix(nlb["nlb_name"], "eg-default-ue2-test-"))
+	assert.NotEmpty(s.T(), nlb["security_group_id"])
+
+	listeners := map[string]map[string]interface{}{}
+	atmos.OutputStruct(s.T(), options, "listeners", &listeners)
+	assert.Len(s.T(), listeners, 3)
+	assert.EqualValues(s.T(), 1433, listeners["sql"]["port"])
+	assert.Equal(s.T(), "TCP", listeners["sql"]["protocol"])
+	assert.EqualValues(s.T(), 5022, listeners["sql-ag"]["port"])
+	assert.Equal(s.T(), "UDP", listeners["avl"]["protocol"])
+	assert.NotEmpty(s.T(), listeners["avl"]["target_group_arn"])
+
+	s.DriftTest(component, stack, nil)
+}
+
 func (s *ComponentSuite) TestEnabledFlag() {
 	const component = "nlb/disabled"
 	const stack = "default-test"

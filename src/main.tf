@@ -21,6 +21,7 @@ module "nlb" {
   vpc_id                        = coalesce(var.vpc_id, one(module.vpc[*].outputs.vpc_id))
   subnet_ids                    = coalesce(var.subnet_ids, var.internal ? one(module.vpc[*].outputs.private_subnet_ids) : one(module.vpc[*].outputs.public_subnet_ids))
   security_group_ids            = var.security_group_ids
+  security_group_enabled        = var.security_group_enabled
   internal                      = var.internal
   load_balancer_name            = var.load_balancer_name
   load_balancer_name_max_length = var.load_balancer_name_max_length
